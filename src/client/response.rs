@@ -4,14 +4,14 @@ use std::io::{BufferedReader, IoResult};
 use header;
 use header::common::{ContentLength, TransferEncoding};
 use header::common::transfer_encoding::Chunked;
-use net::{NetworkStream, HttpStream};
+use net::{NetworkStream, HyperStream};
 use http::{read_status_line, HttpReader, SizedReader, ChunkedReader, EofReader};
 use status;
 use version;
 use {HttpResult};
 
 /// A response for a client request to a remote server.
-pub struct Response<S = HttpStream> {
+pub struct Response<S = HyperStream> {
     /// The status from the server.
     pub status: status::StatusCode,
     /// The headers from the server.

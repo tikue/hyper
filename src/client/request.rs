@@ -6,7 +6,7 @@ use url::Url;
 use method::{mod, Get, Post, Delete, Put, Patch, Head, Options};
 use header::Headers;
 use header::common::Host;
-use net::{NetworkStream, HttpStream, WriteStatus, Fresh, Streaming};
+use net::{NetworkStream, HyperStream, WriteStatus, Fresh, Streaming};
 use http::LINE_ENDING;
 use version;
 use {HttpResult, HttpUriError};
@@ -38,7 +38,7 @@ impl<W: WriteStatus> Request<W> {
 impl Request<Fresh> {
     /// Create a new client request.
     pub fn new(method: method::Method, url: Url) -> HttpResult<Request<Fresh>> {
-        Request::with_stream::<HttpStream>(method, url)
+        Request::with_stream::<HyperStream>(method, url)
     }
 
     /// Create a new client request with a specific underlying NetworkStream.
@@ -55,7 +55,7 @@ impl Request<Fresh> {
         };
         debug!("port={}", port);
 
-        let stream: S = try_io!(NetworkStream::connect(host.as_slice(), port));
+        let stream: S = try_io!(NetworkStream::connect(host.as_slice(), port, url.scheme.as_slice()));
         let stream = BufferedWriter::new(stream.abstract());
         let mut headers = Headers::new();
         headers.set(Host(host));

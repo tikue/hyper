@@ -10,7 +10,7 @@ pub use self::response::Response;
 
 use {HttpResult};
 use net::{NetworkListener, NetworkAcceptor, NetworkStream,
-          HttpAcceptor, HttpListener, HttpStream,
+          HttpAcceptor, HttpListener, HyperStream,
           Fresh};
 
 pub mod request;
@@ -82,14 +82,14 @@ impl<L: NetworkListener<S, A>, S: NetworkStream, A: NetworkAcceptor<S>> Server<L
     }
 
     /// Binds to a socket and starts handling connections.
-    pub fn listen<H: Handler<HttpAcceptor, HttpStream>>(self, handler: H) -> HttpResult<Listening<HttpAcceptor>> {
-        self.listen_network::<H, HttpStream, HttpAcceptor, HttpListener>(handler)
+    pub fn listen<H: Handler<HttpAcceptor, HyperStream>>(self, handler: H) -> HttpResult<Listening<HttpAcceptor>> {
+        self.listen_network::<H, HyperStream, HttpAcceptor, HttpListener>(handler)
     }
 }
 
 /// An iterator over incoming connections, represented as pairs of
 /// hyper Requests and Responses.
-pub struct Incoming<S: Send = HttpStream> {
+pub struct Incoming<S: Send = HyperStream> {
     from: Intertwined<IoResult<S>>
 }
 
