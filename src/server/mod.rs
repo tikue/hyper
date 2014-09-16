@@ -4,6 +4,7 @@ use std::io::net::ip::{IpAddr, Port, SocketAddr};
 
 use intertwine::{Intertwine, Intertwined};
 use macceptor::MoveAcceptor;
+use openssl::ssl::Ssl;
 
 pub use self::request::Request;
 pub use self::response::Response;
@@ -21,7 +22,8 @@ pub mod response;
 /// Once listening, it will create a `Request`/`Response` pair for each
 /// incoming connection, and hand them to the provided handler.
 pub struct Server<L = HttpListener> {
-    pairs: Vec<(IpAddr, Port)>
+    pairs: Vec<(IpAddr, Port)>,
+    ssl: Option<Ssl>
 }
 
 macro_rules! try_option(
@@ -35,13 +37,31 @@ macro_rules! try_option(
 
 impl Server<HttpListener> {
     /// Creates a new server that will handle `HttpStream`s.
+    #[inline]
     pub fn http(ip: IpAddr, port: Port) -> Server {
-        Server { pairs: vec![(ip, port)] }
+        Server::new(vec![(ip, port)], None)
+    }
+
+    /// Creates a new server that will handle `HttpsStream`s.
+    #[inline]
+    pub fn https(ip: IpAddr, port: Port, ssl: Ssl) -> Server {
+        Server::new(vec![(ip, port)], Some(ssl))
     }
 
     /// Creates a server that can listen to many (ip, port) pairs.
+    #[inline]
     pub fn many(pairs: Vec<(IpAddr, Port)>) -> Server {
-        Server { pairs: pairs }
+        Server::new(pairs, None)
+    }
+
+    /// Creates a server that can listen to many (ip, port) pairs, over SSL.
+    pub fn many_ssl(pairs: Vec<(IpAddr, Port)>, ssl: Ssl) -> Server {
+        Server::new(pairs, Some(ssl))
+    }
+
+    #[inline]
+    fn new(pairs: Vec<(IpAddr, Port)>, ssl: Option<Ssl>) -> Server {
+        Server { pairs: pairs, ssl: ssl }
     }
 }
 
